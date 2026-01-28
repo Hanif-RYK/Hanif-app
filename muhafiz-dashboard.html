@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Muhafiz Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #e8eef5 0%, #d4dce8 100%);
+            min-height: 100vh;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 5px 0;
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .menu-icon span {
+            width: 100%;
+            height: 3px;
+            background-color: #333;
+            border-radius: 2px;
+        }
+
+        .header-content h1 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .header-content .date {
+            font-size: 14px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .dashboard {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .card-wrapper {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .card-wrapper:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            background: transparent;
+            border-radius: 0;
+            padding: 18px 28px;
+            margin-bottom: 0;
+            box-shadow: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .card:hover {
+            transform: none;
+            box-shadow: none;
+            background: #f9fafb;
+        }
+
+        .card-content h2 {
+            font-size: 15px;
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .card-content .count {
+            font-size: 40px;
+            font-weight: 700;
+        }
+
+        .card-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+        }
+
+        .files-out .count {
+            color: #2563eb;
+        }
+
+        .files-out .card-icon {
+            background: #dbeafe;
+        }
+
+        .overdue .count {
+            color: #1a1a1a;
+        }
+
+        .overdue .card-icon {
+            background: #f3f4f6;
+        }
+
+        .returned .count {
+            color: #16a34a;
+        }
+
+        .returned .card-icon {
+            background: #dcfce7;
+        }
+
+        .new-entry-btn {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .new-entry-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .new-entry-btn:active {
+            transform: translateY(0);
+        }
+
+        .plus-icon {
+            font-size: 24px;
+            font-weight: 300;
+        }
+
+        /* Icon styles */
+        .icon-document::before {
+            content: "📄";
+        }
+
+        .icon-warning::before {
+            content: "⚠️";
+        }
+
+        .icon-check::before {
+            content: "✅";
+        }
+
+        @media (max-width: 600px) {
+            .header-content h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 16px 24px;
+            }
+
+            .card-content .count {
+                font-size: 36px;
+            }
+
+            .card-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+            
+            .new-entry-btn {
+                padding: 16px;
+                font-size: 17px;
+            }
+        }
+
+        /* Form Container Styles */
+        .form-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #e8eef5 0%, #d4dce8 100%);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 15px 10px;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 5px 0;
+        }
+
+        .form-content {
+            max-width: 100%;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .dropdown-field {
+            margin-bottom: 20px;
+        }
+
+        .dropdown-field label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .dropdown-field select {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            cursor: pointer;
+        }
+
+        /* Collapsible Section */
+        .collapsible-section {
+            margin-bottom: 20px;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .collapsible-header:hover {
+            background: #f3f4f6;
+        }
+
+        .collapse-icon {
+            transition: transform 0.3s;
+            color: #6b7280;
+        }
+
+        .collapse-icon.rotated {
+            transform: rotate(-180deg);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0;
+        }
+
+        .collapsible-content.active {
+            max-height: 500px;
+            padding-top: 15px;
+        }
+
+        .capture-box {
+            border: 2px dashed #60a5fa;
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .capture-box:hover {
+            background: #eff6ff;
+            border-color: #2563eb;
+        }
+
+        .camera-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .capture-text {
+            color: #2563eb;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .input-field select {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            cursor: pointer;
+        }
+
+        .input-field select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .duration-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 14px;
+            background: white;
+        }
+
+        .duration-btn {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 28px;
+            font-weight: 300;
+            cursor: pointer;
+            padding: 0 10px;
+            line-height: 1;
+        }
+
+        .duration-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .cancel-btn {
+            flex: 1;
+            padding: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cancel-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .save-btn {
+            flex: 2;
+            padding: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .save-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        /* File List Styles */
+        .files-list {
+            padding: 0 20px;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        }
+
+        .files-list.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+        }
+
+        .file-item {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .file-item:last-child {
+            margin-bottom: 16px;
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .file-info h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .file-info p {
+            font-size: 13px;
+            color: #666;
+            margin: 2px 0;
+        }
+
+        .file-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-late {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-ontime {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .call-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .call-btn:hover {
+            background: #059669;
+        }
+
+        .receive-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .receive-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <div class="menu-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="header-content">
+                <h1>Muhafiz</h1>
+                <div class="date">Tuesday, 27 January 2026</div>
+            </div>
+        </div>
+
+        <div class="card-wrapper">
+            <div class="card files-out" onclick="toggleFileList('filesOut')">
+                <div class="card-content">
+                    <h2>Files Out</h2>
+                    <div class="count" id="filesOutCount">0</div>
+                </div>
+                <div class="card-icon">
+                    <span class="icon-document"></span>
+                </div>
+            </div>
+            <div id="filesOutList" class="files-list collapsed"></div>
+        </div>
+
+        <div class="card-wrapper">
+            <div class="card overdue" onclick="toggleFileList('overdue')">
+                <div class="card-content">
+                    <h2>Overdue Files</h2>
+                    <div class="count" id="overdueCount">0</div>
+                </div>
+                <div class="card-icon">
+                    <span class="icon-warning"></span>
+                </div>
+            </div>
+            <div id="overdueList" class="files-list collapsed"></div>
+        </div>
+
+        <div class="card-wrapper">
+            <div class="card returned" onclick="toggleFileList('returned')">
+                <div class="card-content">
+                    <h2>Returned Files</h2>
+                    <div class="count" id="returnedCount">0</div>
+                </div>
+                <div class="card-icon">
+                    <span class="icon-check"></span>
+                </div>
+            </div>
+            <div id="returnedList" class="files-list collapsed"></div>
+        </div>
+
+        <button class="new-entry-btn" onclick="handleNewEntry()">
+            <span class="plus-icon">+</span>
+            New File Entry
+        </button>
+    </div>
+
+    <!-- New File Entry Form -->
+    <div class="form-container" id="formContainer">
+        <div class="form-header">
+            <div class="menu-icon" onclick="goBackToDashboard()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="header-content">
+                <h1>Muhafiz</h1>
+                <div class="date">Tuesday, 27 January 2026</div>
+            </div>
+        </div>
+
+        <div class="form-content">
+            <div class="form-section">
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleCollapsible('caseInfo')">
+                        <span>Case Title & Nature</span>
+                        <span class="collapse-icon" id="caseInfoIcon">▼</span>
+                    </div>
+                    <div class="collapsible-content" id="caseInfo">
+                        <div class="input-field">
+                            <label>Case Title</label>
+                            <input type="text" id="caseTitle" placeholder="Enter case title">
+                        </div>
+                        <div class="input-field">
+                            <label>Case Nature</label>
+                            <select id="caseNature" onchange="handleCaseNatureChange()">
+                                <option value="">Select Case Nature</option>
+                                <option value="civil">Civil</option>
+                                <option value="criminal">Criminal</option>
+                                <option value="execution">Execution</option>
+                                <option value="miscellaneous">Miscellaneous</option>
+                                <option value="appeal">Appeal</option>
+                                <option value="revision">Revision</option>
+                                <option value="others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="capture-box" onclick="handleCapture()">
+                    <div class="camera-icon">📷</div>
+                    <div class="capture-text" id="captureText">Tap to Capture</div>
+                    <input type="hidden" id="imageCaptured" value="false">
+                </div>
+
+                <div class="input-field">
+                    <label>Date of Hearing <span class="required">*</span></label>
+                    <input type="date" id="hearingDate" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="input-field">
+                    <label>Taken By <span class="required">*</span></label>
+                    <select id="takenBy" onchange="toggleNameMobileFields()" required>
+                        <option value="">Select</option>
+                        <option value="advocate">Advocate</option>
+                        <option value="munshi">Munshi</option>
+                        <option value="court_staff">Court Staff</option>
+                        <option value="other_court_staff">Other Court Staff</option>
+                        <option value="police_official">Police Official</option>
+                        <option value="govt_official">Govt Official</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+
+                <div class="input-field" id="nameField" style="display: none;">
+                    <label>Name <span class="required">*</span></label>
+                    <input type="text" id="name" disabled>
+                </div>
+
+                <div class="input-field" id="mobileField" style="display: none;">
+                    <label>Mobile No <span class="required">*</span></label>
+                    <input type="tel" id="mobile" placeholder="03XXXXXXXXX" pattern="03[0-9]{9}" disabled>
+                </div>
+
+                <div class="input-field">
+                    <label>Duration <span class="required">*</span></label>
+                    <div class="duration-control">
+                        <button type="button" class="duration-btn" onclick="decreaseDuration()">−</button>
+                        <span class="duration-value" id="durationValue">1 Hour</span>
+                        <button type="button" class="duration-btn" onclick="increaseDuration()">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="cancel-btn" onclick="hideForm()">Cancel</button>
+                <button class="save-btn" onclick="saveEntry()">Save Entry 💾</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const durations = ['5 Mins', '15 Mins', '30 Mins', '1 Hour', '3 Hours', '1 Day', '2 Days'];
+        let currentDurationIndex = 3; // Start at "1 Hour"
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFiles();
+            startTimerCheck();
+            startLiveTimers();
+        });
+
+        function toggleFileList(type) {
+            const listId = type === 'filesOut' ? 'filesOutList' : 
+                          type === 'overdue' ? 'overdueList' : 'returnedList';
+            const list = document.getElementById(listId);
+            
+            list.classList.toggle('collapsed');
+        }
+
+        function handleNewEntry() {
+            document.querySelector('.dashboard').style.display = 'none';
+            document.getElementById('formContainer').classList.add('active');
+        }
+
+        function hideForm() {
+            document.getElementById('formContainer').classList.remove('active');
+            document.querySelector('.dashboard').style.display = 'block';
+            resetForm();
+        }
+
+        function goBackToDashboard() {
+            if (document.getElementById('formContainer').classList.contains('active')) {
+                hideForm();
+            } else {
+                alert('Menu functionality will be implemented here!');
+            }
+        }
+
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(id + 'Icon');
+            
+            content.classList.toggle('active');
+            icon.classList.toggle('rotated');
+        }
+
+        function handleCaseNatureChange() {
+            const caseNature = document.getElementById('caseNature').value;
+            const hearingDateField = document.getElementById('hearingDate');
+            
+            if (caseNature === 'others') {
+                hearingDateField.disabled = true;
+                hearingDateField.value = '';
+            } else {
+                hearingDateField.disabled = false;
+            }
+        }
+
+        function toggleNameMobileFields() {
+            const takenBy = document.getElementById('takenBy').value;
+            const nameField = document.getElementById('nameField');
+            const mobileField = document.getElementById('mobileField');
+            const nameInput = document.getElementById('name');
+            const mobileInput = document.getElementById('mobile');
+
+            if (takenBy) {
+                nameField.style.display = 'block';
+                mobileField.style.display = 'block';
+                nameInput.disabled = false;
+                mobileInput.disabled = false;
+            } else {
+                nameField.style.display = 'none';
+                mobileField.style.display = 'none';
+                nameInput.disabled = true;
+                mobileInput.disabled = true;
+                nameInput.value = '';
+                mobileInput.value = '';
+            }
+        }
+
+        function handleCapture() {
+            // Simulate image capture
+            document.getElementById('imageCaptured').value = 'true';
+            document.getElementById('captureText').textContent = '✓ Image Captured';
+            document.querySelector('.capture-box').style.borderColor = '#16a34a';
+            document.querySelector('.capture-text').style.color = '#16a34a';
+            alert('Image captured successfully!');
+        }
+
+        function decreaseDuration() {
+            if (currentDurationIndex > 0) {
+                currentDurationIndex--;
+                updateDurationDisplay();
+            }
+        }
+
+        function increaseDuration() {
+            if (currentDurationIndex < durations.length - 1) {
+                currentDurationIndex++;
+                updateDurationDisplay();
+            }
+        }
+
+        function updateDurationDisplay() {
+            document.getElementById('durationValue').textContent = durations[currentDurationIndex];
+        }
+
+        function resetForm() {
+            document.getElementById('caseTitle').value = '';
+            document.getElementById('caseNature').value = '';
+            document.getElementById('hearingDate').value = '';
+            document.getElementById('hearingDate').disabled = false;
+            document.getElementById('takenBy').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('mobile').value = '';
+            document.getElementById('imageCaptured').value = 'false';
+            document.getElementById('captureText').textContent = 'Tap to Capture';
+            document.querySelector('.capture-box').style.borderColor = '#60a5fa';
+            document.querySelector('.capture-text').style.color = '#2563eb';
+            currentDurationIndex = 3;
+            updateDurationDisplay();
+            toggleNameMobileFields();
+        }
+
+        function getDurationInMinutes(duration) {
+            const map = {
+                '5 Mins': 5,
+                '15 Mins': 15,
+                '30 Mins': 30,
+                '1 Hour': 60,
+                '3 Hours': 180,
+                '1 Day': 1440,
+                '2 Days': 2880
+            };
+            return map[duration] || 60;
+        }
+
+        function saveEntry() {
+            const caseTitle = document.getElementById('caseTitle').value.trim();
+            const caseNature = document.getElementById('caseNature').value;
+            const imageCaptured = document.getElementById('imageCaptured').value === 'true';
+            const hearingDate = document.getElementById('hearingDate').value;
+            const takenBy = document.getElementById('takenBy').value;
+            const name = document.getElementById('name').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+
+            // Validation: Case Title OR Image must be provided
+            if (!caseTitle && !imageCaptured) {
+                alert('Error: Please enter Case Title OR capture an image!');
+                return;
+            }
+
+            // Validation: Date of hearing (unless case nature is "others")
+            if (caseNature !== 'others' && !hearingDate) {
+                alert('Error: Date of Hearing is required!');
+                return;
+            }
+
+            // Validation: Taken By
+            if (!takenBy) {
+                alert('Error: Please select who took the file!');
+                return;
+            }
+
+            // Validation: Name
+            if (!name) {
+                alert('Error: Name is required!');
+                return;
+            }
+
+            // Validation: Mobile Number (must be 11 digits)
+            if (!mobile) {
+                alert('Error: Mobile Number is required!');
+                return;
+            }
+
+            if (!mobile.match(/^03[0-9]{9}$/)) {
+                alert('Error: Mobile number must be exactly 11 digits in format 03XXXXXXXXX!');
+                return;
+            }
+
+            // Create file entry
+            const fileEntry = {
+                id: Date.now(),
+                caseTitle: caseTitle || 'Image Captured',
+                caseNature: caseNature || 'N/A',
+                hearingDate: hearingDate || 'N/A',
+                takenBy: takenBy,
+                name: name,
+                mobile: mobile,
+                duration: durations[currentDurationIndex],
+                durationMinutes: getDurationInMinutes(durations[currentDurationIndex]),
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + getDurationInMinutes(durations[currentDurationIndex]) * 60000).toISOString(),
+                status: 'out'
+            };
+
+            // Save to localStorage
+            const filesOut = JSON.parse(localStorage.getItem('filesOut') || '[]');
+            filesOut.push(fileEntry);
+            localStorage.setItem('filesOut', JSON.stringify(filesOut));
+
+            alert('✓ Entry saved successfully!');
+            
+            // Reset form and go back to dashboard
+            hideForm();
+            loadFiles();
+        }
+
+        function loadFiles() {
+            const filesOut = JSON.parse(localStorage.getItem('filesOut') || '[]');
+            const overdueFiles = JSON.parse(localStorage.getItem('overdueFiles') || '[]');
+            const returnedFiles = JSON.parse(localStorage.getItem('returnedFiles') || '[]');
+
+            // Update counts
+            document.getElementById('filesOutCount').textContent = filesOut.length;
+            document.getElementById('overdueCount').textContent = overdueFiles.length;
+            document.getElementById('returnedCount').textContent = returnedFiles.length;
+
+            // Render file lists
+            renderFileList('filesOutList', filesOut, 'out');
+            renderFileList('overdueList', overdueFiles, 'overdue');
+            renderFileList('returnedList', returnedFiles, 'returned');
+        }
+
+        function renderFileList(containerId, files, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            files.forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-item';
+                
+                const isLate = type === 'returned' && file.returnedLate;
+                
+                // Calculate remaining time for files out and overdue
+                let timeRemaining = '';
+                if (type === 'out' || type === 'overdue') {
+                    timeRemaining = calculateTimeRemaining(file.expiresAt);
+                }
+                
+                fileDiv.innerHTML = `
+                    <div class="file-header">
+                        <div class="file-info">
+                            <h3>${file.caseTitle}</h3>
+                            <p><strong>Nature:</strong> ${file.caseNature}</p>
+                            <p><strong>Taken By:</strong> ${file.name} (${file.takenBy})</p>
+                            <p><strong>Hearing Date:</strong> ${file.hearingDate}</p>
+                            <p><strong>Duration:</strong> ${file.duration}</p>
+                            ${(type === 'out' || type === 'overdue') ? `<p id="timer-${file.id}"><strong>Time Remaining:</strong> ${timeRemaining}</p>` : ''}
+                            ${type === 'returned' ? `<p><strong>Returned:</strong> ${new Date(file.returnedAt).toLocaleString()}</p>` : ''}
+                        </div>
+                        ${isLate ? '<div class="file-status status-late">LATE</div>' : ''}
+                        ${type === 'returned' && !isLate ? '<div class="file-status status-ontime">On Time</div>' : ''}
+                    </div>
+                    <div class="file-actions">
+                        <button class="action-btn call-btn" onclick="event.stopPropagation(); makeCall('${file.mobile}')">📞 Call</button>
+                        ${type !== 'returned' ? `<button class="action-btn receive-btn" onclick="event.stopPropagation(); receiveFile(${file.id}, '${type}')">✓ Receive</button>` : ''}
+                        ${type === 'returned' ? `<button class="action-btn delete-btn" onclick="event.stopPropagation(); deleteFile(${file.id})">🗑 Delete</button>` : ''}
+                    </div>
+                `;
+                
+                container.appendChild(fileDiv);
+            });
+        }
+
+        function calculateTimeRemaining(expiresAt) {
+            const now = new Date();
+            const expires = new Date(expiresAt);
+            const diff = expires - now;
+            
+            if (diff <= 0) {
+                return 'OVERDUE';
+            }
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            if (days > 0) {
+                return `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+                return `${hours}h ${minutes}m ${seconds}s`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${seconds}s`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+
+        function updateLiveTimers() {
+            const filesOut = JSON.parse(localStorage.getItem('filesOut') || '[]');
+            const overdueFiles = JSON.parse(localStorage.getItem('overdueFiles') || '[]');
+            
+            [...filesOut, ...overdueFiles].forEach(file => {
+                const timerElement = document.getElementById(`timer-${file.id}`);
+                if (timerElement) {
+                    const timeRemaining = calculateTimeRemaining(file.expiresAt);
+                    timerElement.innerHTML = `<strong>Time Remaining:</strong> ${timeRemaining}`;
+                }
+            });
+        }
+
+        function startLiveTimers() {
+            setInterval(() => {
+                updateLiveTimers();
+            }, 1000); // Update every second
+        }
+
+        function makeCall(mobile) {
+            window.location.href = `tel:${mobile}`;
+        }
+
+        function receiveFile(fileId, currentStatus) {
+            if (!confirm('Has the file been received?')) {
+                return;
+            }
+
+            const storageKey = currentStatus === 'out' ? 'filesOut' : 'overdueFiles';
+            const files = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const fileIndex = files.findIndex(f => f.id === fileId);
+            
+            if (fileIndex === -1) return;
+
+            const file = files[fileIndex];
+            const now = new Date();
+            const expiresAt = new Date(file.expiresAt);
+            const isLate = now > expiresAt;
+
+            // Move to returned files
+            const returnedFiles = JSON.parse(localStorage.getItem('returnedFiles') || '[]');
+            returnedFiles.push({
+                ...file,
+                returnedAt: now.toISOString(),
+                returnedLate: isLate,
+                previousStatus: currentStatus
+            });
+            localStorage.setItem('returnedFiles', JSON.stringify(returnedFiles));
+
+            // Remove from current list
+            files.splice(fileIndex, 1);
+            localStorage.setItem(storageKey, JSON.stringify(files));
+
+            alert(isLate ? '⚠ File received but it was LATE!' : '✓ File received on time!');
+            loadFiles();
+        }
+
+        function deleteFile(fileId) {
+            if (!confirm('Are you sure you want to delete this file from history?')) {
+                return;
+            }
+
+            const returnedFiles = JSON.parse(localStorage.getItem('returnedFiles') || '[]');
+            const updatedFiles = returnedFiles.filter(f => f.id !== fileId);
+            localStorage.setItem('returnedFiles', JSON.stringify(updatedFiles));
+
+            alert('✓ File deleted from history!');
+            loadFiles();
+        }
+
+        function startTimerCheck() {
+            setInterval(() => {
+                checkOverdueFiles();
+            }, 30000); // Check every 30 seconds
+        }
+
+        function checkOverdueFiles() {
+            const filesOut = JSON.parse(localStorage.getItem('filesOut') || '[]');
+            const overdueFiles = JSON.parse(localStorage.getItem('overdueFiles') || '[]');
+            const now = new Date();
+
+            const stillOut = [];
+            let newOverdue = false;
+
+            filesOut.forEach(file => {
+                const expiresAt = new Date(file.expiresAt);
+                if (now > expiresAt) {
+                    overdueFiles.push(file);
+                    newOverdue = true;
+                } else {
+                    stillOut.push(file);
+                }
+            });
+
+            if (newOverdue) {
+                localStorage.setItem('filesOut', JSON.stringify(stillOut));
+                localStorage.setItem('overdueFiles', JSON.stringify(overdueFiles));
+                alert('⚠ ALERT: One or more files are now OVERDUE!');
+                loadFiles();
+            }
+        }
+
+        // Handle browser back button
+        window.addEventListener('popstate', function(event) {
+            if (document.getElementById('formContainer').classList.contains('active')) {
+                event.preventDefault();
+                hideForm();
+            }
+        });
+
+        // Add menu toggle functionality
+        document.querySelectorAll('.menu-icon').forEach(icon => {
+            if (!icon.hasAttribute('onclick')) {
+                icon.addEventListener('click', function() {
+                    alert('Menu functionality will be implemented here!');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
