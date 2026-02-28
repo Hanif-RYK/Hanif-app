@@ -1,8 +1,0 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.netlify.hanifryk.twa",
-        "sha256_cert_fingerprints": ["DE:17:FE:C8:61:70:54:FB:4E:4C:4E:EA:C3:D3:69:0A:6F:D9:44:B8:4F:5A:CF:70:62:56:D2:13:E1:BD:7A:E3"]
-      }
-    }]
